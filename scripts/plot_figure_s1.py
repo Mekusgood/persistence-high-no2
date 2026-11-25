@@ -3,13 +3,12 @@
 plot_figure_s1.py
 Figure S1: threshold sensitivity of run-structure metrics, 70th–90th percentiles.
 
-Values are the corrected Table 8 (land-only series). All rows use linear-interpolation
-percentiles of the 72 monthly land-only city means (Option B), so the 75th-percentile row
-matches the threshold reported in the Methods (18 high months in each city). The figure is generated from the table values below so the
-two cannot diverge.
+Table 8 values are computed from the canonical input (option_B_landonly_input.csv) using
+linear-interpolation percentiles of the 72 monthly land-only city means (Option B), so the
+75th-percentile row matches the Methods (18 high months in each city).
 
 Outputs: figure_S1_threshold_sensitivity.pdf / .png / _caption.txt
-Usage  : python plot_figure_s1.py --outdir "/content/drive/MyDrive/NO2_persistence_exports/scripts/figures"
+Usage  : python plot_figure_s1.py --input option_B_landonly_input.csv --outdir figures
 """
 import argparse
 from pathlib import Path
@@ -26,28 +25,48 @@ MARKERS = {"Lagos": "o", "Kinshasa": "s", "Dar es Salaam": "^", "Johannesburg": 
 PERCENTILES = [70, 75, 80, 90]
 PRIMARY = 75
 
-# city, percentile, threshold (1e15 molec cm-2), high months, runs, mean run, longest run,
-# peak season, peak fraction   -- from corrected Table 8
-TABLE8 = [
-    ("Lagos", 70, 4.22, 22, 8, 2.8, 5, "DJF", 0.73),
-    ("Kinshasa", 70, 2.41, 22, 8, 2.8, 5, "JJA", 0.64),
-    ("Dar es Salaam", 70, 1.02, 22, 11, 2.0, 3, "JJA", 0.36),
-    ("Johannesburg", 70, 7.43, 22, 12, 1.8, 3, "JJA", 0.50),
-    ("Lagos", 75, 4.31, 18, 7, 2.6, 4, "DJF", 0.72),
-    ("Kinshasa", 75, 2.60, 18, 10, 1.8, 3, "JJA", 0.61),
-    ("Dar es Salaam", 75, 1.04, 18, 12, 1.5, 2, "JJA", 0.39),
-    ("Johannesburg", 75, 7.75, 18, 9, 2.0, 3, "JJA", 0.56),
-    ("Lagos", 80, 4.43, 15, 8, 1.9, 4, "DJF", 0.80),
-    ("Kinshasa", 80, 2.63, 15, 7, 2.1, 3, "JJA", 0.67),
-    ("Dar es Salaam", 80, 1.06, 15, 10, 1.5, 2, "JJA", 0.40),
-    ("Johannesburg", 80, 8.16, 15, 8, 1.9, 3, "JJA", 0.67),
-    ("Lagos", 90, 4.95, 8, 6, 1.3, 2, "DJF", 0.88),
-    ("Kinshasa", 90, 2.84, 8, 5, 1.6, 3, "JJA", 0.75),
-    ("Dar es Salaam", 90, 1.10, 8, 7, 1.1, 2, "JJA", 0.63),
-    ("Johannesburg", 90, 10.57, 8, 5, 1.6, 2, "JJA", 0.75),
-]
 COLS = ["city", "percentile", "threshold", "high_months", "runs", "mean_run",
         "longest_run", "peak_season", "peak_fraction"]
+
+MOL_TO_1E15 = 6.02214076e19 / 1e15   # mol m-2 -> 1e15 molec cm-2
+
+
+def _half_up(x, nd):
+    """Round half up (not Python's half-even) so 0.625 becomes 0.63."""
+    from decimal import Decimal, ROUND_HALF_UP
+    return float(Decimal(repr(float(x))).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
+
+
+def _runs(flags):
+    padded = np.concatenate(([0], flags, [0]))
+    d = np.diff(padded)
+    lengths = np.flatnonzero(d == -1) - np.flatnonzero(d == 1)
+    if lengths.size == 0:
+        return 0, 0.0, 0
+    return int(lengths.size), float(lengths.mean()), int(lengths.max())
+
+
+def compute_table(csv_path: Path) -> pd.DataFrame:
+    """Run-structure metrics for each city and percentile, from the land-only monthly series."""
+    df = pd.read_csv(csv_path)
+    rows = []
+    for pct in PERCENTILES:
+        for city in CITY_ORDER:
+            g = df[df.city == city].sort_values("month_start")
+            v = g["no2_tropospheric_column"].to_numpy(dtype=float)
+            thr = np.percentile(v, pct)
+            if pct == PRIMARY:
+                csv_thr = float(g["city_no2_p75"].iloc[0])
+                assert np.isclose(thr, csv_thr, rtol=1e-6), f"{city}: P{pct} differs from city_no2_p75"
+            flags = (v >= thr).astype(int)
+            n_runs, mean_run, longest = _runs(flags)
+            counts = pd.Series(g["season_4"].to_numpy()[flags == 1]).value_counts()
+            n_high = int(flags.sum())
+            rows.append((city, pct, _half_up(thr * MOL_TO_1E15, 2), n_high, n_runs,
+                         _half_up(mean_run, 1), longest, counts.idxmax(),
+                         _half_up(counts.max() / n_high, 2)))
+    return pd.DataFrame(rows, columns=COLS)
+
 
 CAPTION = (
     "Figure S1. Threshold sensitivity of run-structure metrics for Lagos, Kinshasa, Dar es Salaam "
@@ -123,10 +142,13 @@ def plot(df, outdir: Path):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--input", type=Path, required=True,
+                    help="option_B_landonly_input.csv (canonical input)")
     ap.add_argument("--outdir", type=Path, default=Path("figures"))
     args = ap.parse_args()
-    df = pd.DataFrame(TABLE8, columns=COLS)
+    df = compute_table(args.input)
     check_table(df)
+    print(df.to_string(index=False))
     plot(df, args.outdir)
 
 

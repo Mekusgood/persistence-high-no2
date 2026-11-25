@@ -4,7 +4,7 @@ plot_monthly_timeseries.py
 ==========================
 Monthly tropospheric NO2 time series for four African cities (2019-2024), land-only.
 
-Input  : no2_persistence2019_2024_landonly_GEEthresholds.csv
+Input  : option_B_landonly_input.csv
          Columns used: month_start, city, no2_tropospheric_column (mol m-2, land-only),
          city_no2_p75 (mol m-2, land-only city-wide P75 from GEE).
          The all-cell column is never read.
@@ -283,7 +283,7 @@ def main() -> None:
         description="Monthly NO2 time series, land-only, four cities, 2019-2024."
     )
     parser.add_argument("--input", type=Path, required=True)
-                       # help="no2_persistence2019_2024_landonly_GEEthresholds.csv")
+                       # help="option_B_landonly_input.csv")
     parser.add_argument("--figures-dir", type=Path, default=Path("figures") / "plots")
     args = parser.parse_args()
 
