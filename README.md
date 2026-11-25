@@ -50,7 +50,7 @@ Unit conversion: 1 mol m⁻² = 6.02214 × 10⁴ × 10¹⁵ molecules cm⁻².
 
 - **TROPOMI NO₂:** Sentinel-5P tropospheric NO₂ (`COPERNICUS/S5P/OFFL/L3_NO2`), accessed through Google Earth Engine.
 - **Land mask:** JRC Global Surface Water occurrence; pixels with occurrence of 50% or more are excluded.
-- **City outlines (Figure 6):** FAO. 2015. Global Administrative Unit Layers (GAUL), 2015 version. https://data.apps.fao.org. Accessed through Google Earth Engine as `FAO/GAUL/2015/level2`. Outlines are not included in this repository because of their size; export them from Earth Engine to a local folder and pass that folder to `fig6_landonly.py` with `--outline-dir`.
+- **City outlines:** FAO. 2015. Global Administrative Unit Layers (GAUL), 2015 version. https://data.apps.fao.org. Accessed through Google Earth Engine as `FAO/GAUL/2015/level2`. Outlines are not included in this repository because of their size; export them from Earth Engine to a local folder and pass that folder to `fig6_landonly.py` with `--outline-dir`.
 - **Coverage diagnostics:** HAQAST TROPOMI NO₂ Level-3 product v2.4 (DOI 10.5067/MKJG22GUOD34), used only by `tropomi_diagnostics.py`.
 
 ## Pipeline and run order
