@@ -2,6 +2,8 @@
 
 Analysis code and data for the manuscript on monthly-scale persistence of high tropospheric NO₂ in Lagos, Kinshasa, Dar es Salaam and Johannesburg, using TROPOMI (Sentinel-5P) data for 2019–2024.
 
+Published in *Atmospheric Environment*: [10.1016/j.atmosenv.2026.122525](https://doi.org/10.1016/j.atmosenv.2026.122525)
+
 ## Contents
 
 ```
@@ -78,7 +80,11 @@ Install dependencies first with `pip install -r requirements.txt`.
 
 ## Citation
 
-Cite the manuscript once published, and the archived repository DOI (to be added).
+If you use this code or data, please cite the paper:
+
+> Quantifying the monthly-scale temporal persistence of high-NO2 months in four sub-Saharan African cities using TROPOMI. *Atmospheric Environment*. https://doi.org/10.1016/j.atmosenv.2026.122525
+
+The archived repository DOI will be added once it exists.
 
 ## Licence
 
