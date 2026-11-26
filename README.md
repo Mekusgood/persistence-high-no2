@@ -84,7 +84,7 @@ If you use this code or data, please cite the paper:
 
 > Ugboma, E.A., Onyeuwaoma, N.D. (2026). Quantifying the monthly-scale temporal persistence of high-NO2 months in four sub-Saharan African cities using TROPOMI. *Atmospheric Environment*. https://doi.org/10.1016/j.atmosenv.2026.122525
 
-The archived repository DOI will be added once it exists.
+The archived repository DOI will be added once it exists..
 
 ## Licence
 
